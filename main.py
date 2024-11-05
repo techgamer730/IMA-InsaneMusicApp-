@@ -5,6 +5,7 @@ import random
 import subprocess
 import sys
 import time
+from tkinter import filedialog
 from tinytag import TinyTag
 import vlc
 def clear():
@@ -14,7 +15,67 @@ def clear():
         os.system("clear")
 clear()
 print("WELCOME TO THE MOST INSANE MUSIC PROGRAM EVER AHHHHHHHHHHHHHHHHHHHH")
-library_path = input("Path to library: ")
+def format_library(library_path):
+    print("Not implemented yet :(")
+    input("Enter to continue")
+try:
+    settings_config = open(os.path.expanduser('~').replace("\\", "/") + "/IMAconfig.cfg", "r")
+    library_path = list(settings_config)[0].replace("libraryPath:", "").replace("\n", "")
+except:
+    print("Welcome to IMA!")
+    time.sleep(3)
+    clear()
+    print("You need to choose some options to set up IMA before you begin using it")
+    time.sleep(4)
+    clear()
+    print("You can always change these later using the \"Settings\" option in the main menu")
+    time.sleep(5)
+    clear()
+    settings_config = open(os.path.expanduser('~').replace("\\", "/") + "/IMAconfig.cfg", "w")
+    print("Step 1/4")
+    library_path = input("First type the path to your music library, or type \"GUI\" to open a folder picker: ")
+    if "GUI" in library_path:
+        library_path = filedialog.askdirectory(initialdir = "~", title = "Select your music library folder")
+    library_path = library_path.replace("\\", "/")
+    if str(library_path[len(library_path)-1]) !="/":library_path+="/"
+    settings_config.write("libraryPath:" + library_path + "\n")
+    print("Music library folder path saved!")
+    time.sleep(3)
+    clear()
+    print("Step 2/4")
+    displaylyrics = input("Would you like to display lyrics (if they're available) while playing to songs?(Y/N)")
+    if displaylyrics.lower() == "y":
+        displaylyrics = "true"
+    else:
+        displaylyrics = "false"
+    settings_config.write(f"displayLyrics:{displaylyrics}\n")
+    if displaylyrics=="true":
+        print("Lyrics will now display when playing music!")
+    else:
+        print("Lyrics won't display when playing music.")
+    time.sleep(3)
+    clear()
+    print("Step 3/4")
+    defaultpage = input("Please select which page you would like to be opened first, when IMA is opened the future:\n1 for the artists page\n2 for the albums page\n3 for the search page\n4 for the main menu\n:")
+    if defaultpage=="1":
+        defaultpage="artist"
+    elif defaultpage=="2":
+        defaultpage="album"
+    elif defaultpage=="3":
+        defaultpage="search"
+    elif defaultpage=="4":
+        defaultpage="mainmenu"
+    settings_config.write(f"startupPage:{defaultpage}\n")
+    print("Startup page set successfully!")
+    time.sleep(3)
+    clear()
+    print("Step 4/4")
+    format_library_input = input("Finally, if you selected a music library folder that isn't already formatted for use with IMA, would you like IMA to format it now?(Y/N)(check the readme in the IMA github for more information on how the library will be formatted)\n:")
+    if format_library_input.lower()=="y":
+        format_library(library_path)
+    clear()
+    print("Welcome to IMA!")
+    sleep.wait(3)
 def PlayMusicFr(user_artist, user_album, user_song):
     try:
         current_song_info = audio_files_in_album[user_song-1].split("[]")
@@ -139,6 +200,7 @@ def PlayMusicFr(user_artist, user_album, user_song):
     print("Song finished!")
 #player = vlc.MediaPlayer("TRACKING TEST INNIIIIT.mp4")
 # player.play()
+
 print("--------------------------------")
 print("---------M-A-I-N_M-E-N-U--------")
 print("--------------------------------")
@@ -231,14 +293,13 @@ if mode==1:
                     break
                     counter+=1
 elif mode==2:
-    try:
-        settings_config = open(library_path + "config.cfg", "r")
-    except:
-        settings_config = open(library_path + "config.cfg", "w")
-        settings_config.write("default-codec:aac")
-        settings_config.write("display-lyrics:false")
-        settings_config.write("playback device:")
-    print()
+    # try:
+    #     settings_config = open(library_path + "config.cfg", "r")
+    # except:
+    settings_config = open(library_path + "config.cfg", "w")
+    settings_config.writelines("default-codec:aac\n")
+    settings_config.writelines("display-lyrics:false\n")
+    settings_config.writelines("playback device:\n")
 elif mode==3:
     p = subprocess.Popen(["powershell.exe", ".\"~/Documents/powershell scripts frfr/launch_apple_music_downloader.ps1\""], stdout=sys.stdout)
     sys.stdout.flush()
