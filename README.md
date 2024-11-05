@@ -17,6 +17,7 @@ To-do:
 <li> - [ ] Select albums, without going through an artist first</li>
 <li> - [ ] Play or shuffle all songs by a particular artist, or all songs in whole of library.</li>
 <li> - [ ] Add settings for:
+
  - [ ] Toggling lyrics being displayed
  - [ ] Default playback device
  - [ ] Airpods mode (adding audio delay so lyrics display correctly)
