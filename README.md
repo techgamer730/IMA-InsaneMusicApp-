@@ -1,4 +1,4 @@
-# IMA-InsaneMusicApp-
+# IMA(nsaneMusicApp)
 A (currently cli only) app which can play audio files (through vlc via the python-vlc library).
 Current features:
 <ul>
