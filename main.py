@@ -46,7 +46,7 @@ def PlayMusicFr(user_artist, user_album, user_song):
         for fr in list_of_lyrics:
             counter+=1
             dont_set_last_lyric_timestamp_until_next_loop_pls = False
-            print("LOOK FRFRFR!!" + str(fr) + " AND LOOK FRFR " + str(fr).split("]")[0][1:6])
+            # print("LOOK FRFRFR!!" + str(fr) + " AND LOOK FRFR " + str(fr).split("]")[0][1:6])
             if last_lyric_timestamp == str(fr).split("]")[0][1:6] and counter!=len(list_of_lyrics):
                 # print(str(last_lyric_timestamp) + "*****" + str(str(fr).split("]")[0][1:6]))
                 if last_lyric_timestamp[4] == "9":
