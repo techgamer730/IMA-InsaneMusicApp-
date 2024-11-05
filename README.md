@@ -4,9 +4,10 @@ Current features:
 <ul>
 <li>Navigate through artists, albums and songs</li>
 <li>Shuffle, play whole albums, or play certain songs.</li>
-<li>Duration left of current song displayed</li>
 <li>Lyrics support (currently loads from a .lrc file with same name as audio file)</li>
 <li>Search functionality, to search through song names, album names and artist names.</li>
+<li>Works on Windows, Linux(tested on fedora 40), MacOS not tested, but probably will work
+<li>Duration left of current song displayed</li>
 <li>Can play songs over multiple discs.</li>
 <li>Decently optimised as cli-only</li>
 <li>As vlc is used, atmos files can also be played, even if to use via atmos for headphones.</li>
