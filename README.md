@@ -1,4 +1,4 @@
-# IMA(nsaneMusicApp)
+# IMA(InsaneMusicApp)
 A (currently cli only) app which can play audio files (through vlc via the python-vlc library).
 Current features:
 <ul>
@@ -13,22 +13,20 @@ Current features:
 </ul>
 To-do:
 <ul>
-<li>Actually play the songs searched for lol</li>
-<li>Select albums, without going through an artist first</li>
-<li>Play or shuffle all songs by a particular artist, or all songs in whole of library.</li>
+<li> - [ ] Actually play the songs searched for lol</li>
+<li> - [ ] Select albums, without going through an artist first</li>
+<li> - [ ] Play or shuffle all songs by a particular artist, or all songs in whole of library.</li>
 <li>Add settings for:
 
  - [ ] Toggling lyrics being displayed
  - [ ] Default playback device
- - Airpods mode (adding audio delay so lyrics display correctly)
- - Change library location(to read from)
- - Default codec(if multiple codecs are available)</li>
- -  [x] Test ticked box
- -  [x] another test ticked box
-<li>Allow song.link links to be created for easy song sharing.</li>
-<li>Add playlists</li>
-<li>Allow users to select which codec they want, if there's multiple avalable for an album/song (there may be atmos and lossless versions for instance).</li>
-<li>Make the main loop update every 0.1 seconds to make lyrics work better</li>
-<li>Add discord activity integration</li>
+ - [ ] Airpods mode (adding audio delay so lyrics display correctly)
+ - [ ] Change library location(to read from)
+ - [ ] Default codec(if multiple codecs are available)</li>
+<li> - [ ] Allow song.link links to be created for easy song sharing.</li>
+<li> - [ ] Add playlists</li>
+<li> - [ ] Allow users to select which codec they want, if there's multiple avalable for an album/song (there may be atmos and lossless versions for instance).</li>
+<li> - [ ] Make the main loop update every 0.1 seconds to make lyrics work better</li>
+<li>- [ ] Add discord activity integration</li>
 </li>
 </ul>
