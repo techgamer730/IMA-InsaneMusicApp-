@@ -1,12 +1,12 @@
+import os
+import pandas as pd
+import platform
+import random
+import subprocess
+import sys
+import time
 from tinytag import TinyTag
 import vlc
-import time
-import os
-import random
-import platform
-import sys
-from tinytag import TinyTag
-import pandas as pd
 def clear():
     if platform.system() == "Windows":
         os.system("cls")
@@ -240,9 +240,6 @@ elif mode==2:
         settings_config.write("playback device:")
     print()
 elif mode==3:
-    import subprocess
-    import sys
-    import os
     p = subprocess.Popen(["powershell.exe", ".\"~/Documents/powershell scripts frfr/launch_apple_music_downloader.ps1\""], stdout=sys.stdout)
     sys.stdout.flush()
     p.communicate("echo hi")
