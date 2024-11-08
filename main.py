@@ -8,6 +8,7 @@ import time
 from tkinter import filedialog
 from tinytag import TinyTag
 import vlc
+import shutil
 def clear():
     if platform.system() == "Windows":
         os.system("cls")
@@ -16,7 +17,93 @@ def clear():
 clear()
 print("WELCOME TO THE MOST INSANE MUSIC PROGRAM EVER AHHHHHHHHHHHHHHHHHHHH")
 def format_library(library_path):
-    print("Not implemented yet :(")
+    artist_list, album_list, songs_list, songs_number = [], [], [], 0
+    for dirpath, dirnames, filenames in os.walk(library_path):
+        if filenames:
+            for fr in filenames:
+                if str(fr[len(fr)-4:len(fr)])!=".m4v" and str(fr[len(fr)-4:len(fr)])!=".mp4" and (str(fr[len(fr)-5:len(fr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS or str(fr[len(fr)-4:len(fr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS):
+                    if str(fr[len(fr)-5:len(fr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS:
+                        current_file_extension = str(fr[len(fr)-5:len(fr)])
+                    elif str(fr[len(fr)-4:len(fr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS:
+                        current_file_extension = str(fr[len(fr)-4:len(fr)])
+                    dirpath = dirpath.replace("\\", "/")
+                    songs_number+=1
+                    current_tag = TinyTag.get(dirpath + "/" + fr)
+                    clear()
+                    print(str(songs_number) + " songs found!")
+                    print("Last song found was " + current_tag.title)
+                    p = subprocess.Popen(["powershell.exe", f"ffprobe -v error -select_streams a -i \"{dirpath}/{fr}\"  -show_entries stream=codec_name -output_format flat"], stdout=subprocess.PIPE, text=True)
+                    out, err =  p.communicate()
+                    if current_tag.artist not in artist_list:
+                        os.makedirs("C:/temp/musicapptemp/"+current_tag.artist)
+                    if current_tag.album not in album_list:
+                        os.makedirs("C:/temp/musicapptemp/"+current_tag.artist+"/"+current_tag.album)
+                    shutil.copy(dirpath+"/"+fr, "C:/temp/musicapptemp/"+current_tag.artist+"/"+current_tag.album)
+                    os.rename("C:/temp/musicapptemp/" + current_tag.artist + "/"+current_tag.album + "/" + fr, "C:/temp/musicapptemp/" + current_tag.artist + "/"+current_tag.album + "/" + fr.replace(current_file_extension, "[]"+str(out[out.find("codec_name")+12:len(out)-2])+current_file_extension))
+                    if current_tag.artist not in artist_list:artist_list+=[current_tag.artist]
+                    if current_tag.album not in album_list:album_list+=[current_tag.album]
+    for fr in os.listdir("C:/temp/musicapptemp/"):
+            for frfr in os.listdir("C:/temp/musicapptemp/" + str(fr)):
+                if "(SOUNDTRACK FROM AND INSPIRED BY THE MOTION PICTURE" in frfr.upper():
+                    if "DELUXE EDITION" in frfr.upper():
+                        new_folder_name = frfr.upper().replace("(SOUNDTRACK FROM AND INSPIRED BY THE MOTION PICTURE", "(")
+                    else:
+                        new_folder_name = frfr.upper().replace("SOUNDTRACK FROM AND INSPIRED BY THE MOTION PICTURE", "")
+                    os.rename("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr), "C:/temp/musicapptemp/" + str(fr) + "/" + str(new_folder_name))
+
+    for fr in os.listdir("C:/temp/musicapptemp/"):
+        clear()
+        print("Processing " + fr)
+        for frfr in os.listdir("C:/temp/musicapptemp/" + str(fr)):
+            counter = 0
+            highest_track_number_disc_1 = 1
+            highest_track_number_disc_2 = 1
+            highest_track_number_disc_3 = 1
+            highest_track_number_disc_4 = 1
+            highest_track_number_disc_5 = 1
+            for frfrfr in random.sample(os.listdir("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr)), len(os.listdir("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr)))):
+                if ".lrc" not in frfrfr and ".jpg" not in frfrfr and "ec3" not in frfrfr:
+                    current_tag = TinyTag.get("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(frfrfr))
+                    if current_tag.disc=="1":
+                        if int(current_tag.track)>int(highest_track_number_disc_1):
+                            highest_track_number_disc_1 = current_tag.track
+                            # print(str(current_tag.title) + "has new highest track number of disc 1, at " + str(current_tag.track))
+                    elif current_tag.disc=="2":
+                        if int(current_tag.track)>int(highest_track_number_disc_2):
+                            highest_track_number_disc_2 = current_tag.track
+                            # print(str(current_tag.title) + "has new highest track number of disc 2, at " + str(current_tag.track))
+                    elif current_tag.disc=="3":
+                        if int(current_tag.track)>int(highest_track_number_disc_3):
+                            highest_track_number_disc_3 = current_tag.track
+                            # print(str(current_tag.title) + "has new highest track number of disc 3, at " + str(current_tag.track))
+                    elif current_tag.disc=="4":
+                        if int(current_tag.track)>int(highest_track_number_disc_4):
+                            highest_track_number_disc_4 = current_tag.track
+                            # print(str(current_tag.title) + "has new highest track number of disc 4, at " + str(current_tag.track))
+                    elif current_tag.disc=="5":
+                        if int(current_tag.track)>int(highest_track_number_disc_5):
+                            highest_track_number_disc_5 = current_tag.track
+                            # print(str(current_tag.title) + "has new highest track number of disc 5, at " + str(current_tag.track))
+            for frfrfr in random.sample(os.listdir("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr)), len(os.listdir("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr)))):
+                if ".lrc" not in frfrfr and ".jpg" not in frfrfr and "ec3" not in frfrfr:
+                    current_tag = TinyTag.get("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(frfrfr)) 
+                    if current_tag.disc=="1":
+                        os.rename("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(frfrfr), ("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(int(current_tag.track)) + "[]" + str(frfrfr)))
+                    if current_tag.disc=="2":
+                        os.rename("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(frfrfr), ("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(int(current_tag.track)+int(highest_track_number_disc_1)) + "[]" + str(frfrfr)))
+                    if current_tag.disc=="3":
+                        os.rename("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(frfrfr), ("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(int(current_tag.track)+int(highest_track_number_disc_1)+int(highest_track_number_disc_2)) + "[]" + str(frfrfr)))
+                    if current_tag.disc=="4":
+                        os.rename("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(frfrfr), ("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(int(current_tag.track)+int(highest_track_number_disc_1)+int(highest_track_number_disc_2)+int(highest_track_number_disc_3)) + "[]" + str(frfrfr)))
+                    if current_tag.disc=="5":
+                        os.rename("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(frfrfr), ("C:/temp/musicapptemp/" + str(fr) + "/" + str(frfr) + "/" + str(int(current_tag.track)+int(highest_track_number_disc_1)+int(highest_track_number_disc_2)+int(highest_track_number_disc_3)+int(highest_track_number_disc_4)) + "[]" + str(frfrfr)))
+    for fr in os.listdir("C:/temp/musicapptemp/"):
+        clear()
+        print(str("Moving \"") + str(fr) + "\" from temp to new IMA library folder")
+        p = subprocess.Popen(["powershell.exe", "robocopy \"C:/temp/musicapptemp/" + str(fr) + "\" \"" + library_path + "IMA/" + str(fr) + "/\" /MIR"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        p = subprocess.Popen(["powershell.exe", "Remove-Item -Path \"C:/temp/musicapptemp/" + str(fr) + "\" -recurse"])
+    print("Created an IMA-formatted library, located in: \"" +  library_path + "IMA/\"!")
+
     input("Enter to continue")
 try:
     settings_config = open(os.path.expanduser('~').replace("\\", "/") + "/IMAconfig.cfg", "r")
@@ -38,11 +125,21 @@ except:
         library_path = filedialog.askdirectory(initialdir = "~", title = "Select your music library folder")
     library_path = library_path.replace("\\", "/")
     if str(library_path[len(library_path)-1]) !="/":library_path+="/"
-    settings_config.write("libraryPath:" + library_path + "\n")
-    print("Music library folder path saved!")
-    time.sleep(3)
     clear()
     print("Step 2/4")
+    format_library_input = input("If you selected a music library folder that isn't already formatted for use with IMA, would you like IMA to format it now?(Y/N)(check the readme in the IMA github for more information on how the library will be formatted)\n:")
+    if format_library_input.lower()=="y":
+        format_library(library_path)
+        time.sleep(6)
+        clear()
+        settings_config.write("libraryPath:" + library_path + "IMA/\n")
+        print("New IMA-formatted music library folder path saved!")
+    else:
+        settings_config.write("libraryPath:" + library_path + "\n")
+        print("Music library folder path saved!")
+    time.sleep(3)
+    clear()
+    print("Step 3/4")
     displaylyrics = input("Would you like to display lyrics (if they're available) while playing to songs?(Y/N)")
     if displaylyrics.lower() == "y":
         displaylyrics = "true"
@@ -55,7 +152,7 @@ except:
         print("Lyrics won't display when playing music.")
     time.sleep(3)
     clear()
-    print("Step 3/4")
+    print("Step 4/4")
     defaultpage = input("Please select which page you would like to be opened first, when IMA is opened the future:\n1 for the artists page\n2 for the albums page\n3 for the search page\n4 for the main menu\n:")
     if defaultpage=="1":
         defaultpage="artist"
@@ -69,13 +166,27 @@ except:
     print("Startup page set successfully!")
     time.sleep(3)
     clear()
-    print("Step 4/4")
-    format_library_input = input("Finally, if you selected a music library folder that isn't already formatted for use with IMA, would you like IMA to format it now?(Y/N)(check the readme in the IMA github for more information on how the library will be formatted)\n:")
-    if format_library_input.lower()=="y":
-        format_library(library_path)
+    print("W             !")
+    time.sleep(0.2)
+    clear()
+    print("We           A!")
+    time.sleep(0.2)
+    clear()
+    print("Wel         MA!")
+    time.sleep(0.2)
+    clear()
+    print("Welc       IMA!")
+    time.sleep(0.2)
+    clear()
+    print("Welco      IMA!")
+    time.sleep(0.2)
+    clear()
+    print("Welcom   o IMA!")
+    time.sleep(0.2)
     clear()
     print("Welcome to IMA!")
-    sleep.wait(3)
+    time.sleep(3)
+    clear()
 def PlayMusicFr(user_artist, user_album, user_song):
     try:
         current_song_info = audio_files_in_album[user_song-1].split("[]")
@@ -231,7 +342,7 @@ if mode==1:
     print("Choose an album:")
     counter = 0
     for fr in os.listdir(library_path + os.listdir(library_path)[user_artist-1]):
-        print("album found" + str(fr))
+        # print("album found" + str(fr))
         counter+=1
         print(f"{str(counter)}. {fr}")
     user_album = int(input("Album ID: "))
@@ -240,22 +351,27 @@ if mode==1:
     counter = 0
     audio_files_in_album = []
     track_numbers_of_audio_files_in_album = []
-    print(str(library_path))
-    print(str(os.listdir(library_path)[user_artist-1]))
-    print(str(os.listdir(library_path + os.listdir(library_path)[user_artist-1])[user_album-1]))
+    # print(str(library_path))
+    # print(str(os.listdir(library_path)[user_artist-1]))
+    # print(str(os.listdir(library_path + os.listdir(library_path)[user_artist-1])[user_album-1]))
     for fr in os.listdir(library_path + os.listdir(library_path)[user_artist-1] + "/" + os.listdir(library_path + os.listdir(library_path)[user_artist-1])[user_album-1]):
+        # print(str(fr))
         if ".m4a" in fr:
             # print("song found and added to list: " + str(fr))
             counter+=1
             audio_files_in_album = audio_files_in_album + [fr]
             track_numbers_of_audio_files_in_album = track_numbers_of_audio_files_in_album + [str(fr.split("[]")[0])]
-    # for fr in audio_files_in_album
-            # print(str(counter) + ". " + fr.split("[]")[0])
+    # for fr in audio_files_in_album:
+    #         print(str(counter) + ". " + fr.split("[]")[0])
     if len(audio_files_in_album)==1:
         print(audio_files_in_album[0].split("[]")[0] + ". " + audio_files_in_album[0].split("[]")[1])
         if input("Option (so much choice ik):") == audio_files_in_album[0][0]:
             PlayMusicFr(user_artist, user_album, 1)
-    for counter in range(1,len(audio_files_in_album)):
+    int_track_numbers_of_audio_files_in_album = []
+    for fr in track_numbers_of_audio_files_in_album: int_track_numbers_of_audio_files_in_album+=[int(fr)]
+    int_track_numbers_of_audio_files_in_album.sort()
+    for counter in int_track_numbers_of_audio_files_in_album:
+        counter = int(counter)
         # print(str(counter))
         for fr in range(len(audio_files_in_album)):
             # print(str(fr))
@@ -293,13 +409,27 @@ if mode==1:
                     break
                     counter+=1
 elif mode==2:
-    # try:
-    #     settings_config = open(library_path + "config.cfg", "r")
+    settings_config = open(os.path.expanduser('~').replace("\\", "/") + "/IMAconfig.cfg", "r")
+    library_path = input("Type the path to your IMA music library, or type \"GUI\" to open a folder picker: ")
+    if "GUI" in library_path:
+        library_path = filedialog.askdirectory(initialdir = "~", title = "Select your music library folder")
+    library_path = library_path.replace("\\", "/")
+    if str(library_path[len(library_path)-1]) !="/":library_path+="/"
+    usethisline=False
+    towritetofile = "libraryPath:" + library_path + "\n"
+    for fr in settings_config.readlines():
+        if not usethisline:
+            usethisline = True
+        else:
+            towritetofile+=fr
+    settings_config.close()
+    settings_config = open(os.path.expanduser('~').replace("\\", "/") + "/IMAconfig.cfg", "w")
+    settings_config.write(towritetofile)
     # except:
-    settings_config = open(library_path + "config.cfg", "w")
-    settings_config.writelines("default-codec:aac\n")
-    settings_config.writelines("display-lyrics:false\n")
-    settings_config.writelines("playback device:\n")
+    # settings_config = open(library_path + "config.cfg", "w")
+    # settings_config.writelines("default-codec:aac\n")
+    # settings_config.writelines("display-lyrics:false\n")
+    # settings_config.writelines("playback device:\n")
 elif mode==3:
     p = subprocess.Popen(["powershell.exe", ".\"~/Documents/powershell scripts frfr/launch_apple_music_downloader.ps1\""], stdout=sys.stdout)
     sys.stdout.flush()
@@ -379,7 +509,7 @@ elif mode==4:
             for frfr in os.listdir(library_path + fr):
                 if os.path.isdir(library_path + fr + "/" + frfr):
                     for frfrfr in os.listdir(f"{library_path}{fr}/{frfr}"):
-                        if ".m4a" in frfrfr:
+                        str(frfrfr[len(frfrfr)-4:len(frfrfr)])!=".m4v" and str(frfrfr[len(frfrfr)-4:len(frfrfr)])!=".mp4" and (str(frfrfr[len(frfrfr)-5:len(frfrfr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS or str(frfrfr[len(frfrfr)-4:len(frfrfr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS):
                             songslist+=[frfrfr.split("[]")[1]]
                             albumlist+=[frfr]
                             artistlist+=[fr]
