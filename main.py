@@ -1,3 +1,6 @@
+from consoledraw import Console
+import getchlib
+import keyboard
 import os
 import pandas as pd
 import platform
@@ -5,10 +8,12 @@ import random
 import subprocess
 import sys
 import time
+from multiprocessing import Process
 from tkinter import filedialog
 from tinytag import TinyTag
 import vlc
 import shutil
+console = Console()
 def clear():
     if platform.system() == "Windows":
         os.system("cls")
@@ -102,8 +107,8 @@ def format_library(library_path):
         print(str("Moving \"") + str(fr) + "\" from temp to new IMA library folder")
         p = subprocess.Popen(["powershell.exe", "robocopy \"C:/temp/musicapptemp/" + str(fr) + "\" \"" + library_path + "IMA/" + str(fr) + "/\" /MIR"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
         p = subprocess.Popen(["powershell.exe", "Remove-Item -Path \"C:/temp/musicapptemp/" + str(fr) + "\" -recurse"])
+    clear()
     print("Created an IMA-formatted library, located in: \"" +  library_path + "IMA/\"!")
-
     input("Enter to continue")
 try:
     settings_config = open(os.path.expanduser('~').replace("\\", "/") + "/IMAconfig.cfg", "r")
@@ -130,7 +135,6 @@ except:
     format_library_input = input("If you selected a music library folder that isn't already formatted for use with IMA, would you like IMA to format it now?(Y/N)(check the readme in the IMA github for more information on how the library will be formatted)\n:")
     if format_library_input.lower()=="y":
         format_library(library_path)
-        time.sleep(6)
         clear()
         settings_config.write("libraryPath:" + library_path + "IMA/\n")
         print("New IMA-formatted music library folder path saved!")
@@ -263,51 +267,92 @@ def PlayMusicFr(user_artist, user_album, user_song):
     player = vlc.MediaPlayer(library_path + os.listdir(library_path)[user_artist-1] + "/" + os.listdir(library_path + os.listdir(library_path)[user_artist-1])[user_album-1] + "/" + audio_files_in_album[user_song-1])
     player.play()
     time.sleep(0.2)
-    clear()
+    if platform.system() == "Windows":
+        os.system("cls")
+    else:
+        os.system("clear")
     current_duration = str(player.get_length())[:(len(str(player.get_length()))-3)]
     current_duration_mins = int(current_duration)//60
     current_duration_secs = int(current_duration)%60
     last_minute = False
     counter = 0
+    file=open("log.txt", "a")
+    file.write("\n\n\n\n\n\n\n\n\n\n\n\n")
+    next_minute_next_loop = False
     while True:
+        file.write("secs: " + str(current_duration_secs) + "\n")
+        file.write("mins: " + str(current_duration_mins) + "\n")
+        # file.write(f"does " + str(str(current_duration_secs)[:3]) + " equal 0.1? result=" + str(str(str(current_duration_secs)[:3])=="0.1") + "\n")
+        # print("!!!!!!!!!!!!!" + str(current_duration_secs))
+        print()
         counter+=1
-        if str(current_song_codec)=="EC3":
+        if str(current_song_codec)=="EC3" or str(current_song_codec)=="eac3":
             current_song_codec = "EC3 (Dolby Atmos)"
-        print("Currently playing \"" + str(current_song_number) + ". " + str(current_song_name) + "\" with the codec \"" + str(current_song_codec) + "\"")
-        if current_duration_mins == 0:
-            current_duration_secs-=1
-            print(str(current_duration_secs) + " secs remaining")
-            if current_duration_secs==0 and last_minute:
-                break
-        elif current_duration_secs !=0:
-            current_duration_secs-=1
-            print(str(current_duration_mins) + " mins " + str(current_duration_secs) + " secs remaining")
-        elif current_duration_mins == 1 and current_duration_secs>=1:
-            print(str(current_duration_mins) + "min " + str(current_duration_secs) + " secs remaining")
-        else:
-            current_duration_mins-=1
-            current_duration_secs=59
-            if current_duration_mins == 1:
-                print(str(current_duration_mins) + "min " + str(current_duration_secs) + " secs remaining")
-            elif current_duration_mins == 0:
-                if last_minute:
-                    break
-                print(str(current_duration_secs) + " secs remaining")
-                last_minute = True
+        if str(player.get_state()) == "State.Paused":
+            console.print("Currently paused \"" + str(current_song_number) + ". " + str(current_song_name) + "\" with the codec \"" + str(current_song_codec) + "\"")
+            if current_duration_mins>1:
+                console.print(str(current_duration_mins) + " mins " + str(str(current_duration_secs)[:str(current_duration_secs).find(".")+2]) + " secs remaining")
+            elif current_duration_mins==1:
+                console.print(str(current_duration_mins) + " min " + str(str(current_duration_secs)[:str(current_duration_secs).find(".")+2]) + " secs remaining")
             else:
-                print(str(current_duration_mins) + " mins " + str(current_duration_secs) + " secs remaining")
-        if no_lyrics_current_song:
-            print("No lyrics for current song :(")
+                console.print(str(str(current_duration_secs)[:str(current_duration_secs).find(".")+2]) + " secs remaining")
         else:
-            if airpods_mode:
-                current_lyric_number = display_lyric(counter-1, current_lyric_number)
+            console.print("Currently playing \"" + str(current_song_number) + ". " + str(current_song_name) + "\" with the codec \"" + str(current_song_codec) + "\"")
+            if str(str(current_duration_secs)[:3])=="0.1":
+                file.write("next_minute_next_loop")
+                next_minute_next_loop = True
+            if no_lyrics_current_song:
+                console.print("No lyrics for current song :(")
             else:
-                current_lyric_number = display_lyric(counter, current_lyric_number)
-            if current_lyric_number!=0:
-                print(str(lyric_lines[current_lyric_number-1]).replace("â€™","\'"))
-        time.sleep(1)
-        clear()
-    clear()
+                if airpods_mode:
+                    current_lyric_number = display_lyric(counter-1, current_lyric_number)
+                else:
+                    current_lyric_number = display_lyric(counter, current_lyric_number)
+                if current_lyric_number!=0:
+                    console.print(str(lyric_lines[current_lyric_number-1]).replace("â€™","\'"))
+            if next_minute_next_loop:
+                next_minute_next_loop = False
+                current_duration_mins-=1
+                current_duration_secs=59.9
+                if current_duration_mins == 1:
+                    console.print(str(current_duration_mins) + "min " + str(str(current_duration_secs)[:str(current_duration_secs).find(".")+2]) + " secs remaining")
+                elif current_duration_mins == -1 or current_duration_mins == 0:
+                    if last_minute:
+                        break
+                    console.print(str(current_duration_secs) + " secs remaining")
+                    last_minute = True
+                else:
+                    console.print(str(current_duration_mins) + " mins " + str(current_duration_secs) + " secs remaining")
+            else:
+                if current_duration_mins == 0:
+                    current_duration_secs-=0.1
+                    console.print(str(str(current_duration_secs)[:str(current_duration_secs).find(".")+2]) + " secs remaining")
+                    if current_duration_secs==0 and last_minute:
+                        break
+                elif current_duration_secs !=0:
+                    current_duration_secs=current_duration_secs-0.1
+                    console.print(str(current_duration_mins) + " mins " + str(str(current_duration_secs)[:str(current_duration_secs).find(".")+2]) + " secs remaining")
+                elif current_duration_mins == 1 and current_duration_secs>=1:
+                    console.print(str(current_duration_mins) + "min " + str(str(current_duration_secs)[:str(current_duration_secs).find(".")+2]) + " secs remaining")
+        console.print("Current volume: " + str(player.audio_get_volume()))
+        for fr in range(0,2):
+            fr = getchlib.getkey(False)
+            if str(fr)=="\' \'":
+                if str(player.get_state()) == "State.Playing":
+                    player.pause()
+                else:
+                    player.play()
+            if str(fr)=="\'H\'":
+                player.audio_set_volume(player.audio_get_volume()+5)
+            if str(fr)=="\'P\'":
+                player.audio_set_volume(player.audio_get_volume()-5)
+        console.update()
+        time.sleep(0.1)
+        console.clear()
+    if platform.system() == "Windows":
+        os.system("cls")
+    else:
+        os.system("clear")
     print("Song finished!")
 #player = vlc.MediaPlayer("TRACKING TEST INNIIIIT.mp4")
 # player.play()
@@ -405,9 +450,9 @@ if mode==1:
                 # print("current user_song: " + str(user_song) + "and current counter: " + str(counter))
                 if int(user_song_fr.split("[]")[0]) == int(user_song):
                     # print("found song fr as number " + str(counter2) + " in audio_files_in_album, which is " + audio_files_in_album[counter2])
-                    PlayMusicFr(user_artist, user_album, counter2+1)
+                    PlayMusicFr(user_artist, user_album, counter2+1)      
                     break
-                    counter+=1
+            break
 elif mode==2:
     settings_config = open(os.path.expanduser('~').replace("\\", "/") + "/IMAconfig.cfg", "r")
     library_path = input("Type the path to your IMA music library, or type \"GUI\" to open a folder picker: ")
@@ -509,7 +554,7 @@ elif mode==4:
             for frfr in os.listdir(library_path + fr):
                 if os.path.isdir(library_path + fr + "/" + frfr):
                     for frfrfr in os.listdir(f"{library_path}{fr}/{frfr}"):
-                        str(frfrfr[len(frfrfr)-4:len(frfrfr)])!=".m4v" and str(frfrfr[len(frfrfr)-4:len(frfrfr)])!=".mp4" and (str(frfrfr[len(frfrfr)-5:len(frfrfr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS or str(frfrfr[len(frfrfr)-4:len(frfrfr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS):
+                        if str(frfrfr[len(frfrfr)-4:len(frfrfr)])!=".m4v" and str(frfrfr[len(frfrfr)-4:len(frfrfr)])!=".mp4" and (str(frfrfr[len(frfrfr)-5:len(frfrfr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS or str(frfrfr[len(frfrfr)-4:len(frfrfr)]) in TinyTag.SUPPORTED_FILE_EXTENSIONS):
                             songslist+=[frfrfr.split("[]")[1]]
                             albumlist+=[frfr]
                             artistlist+=[fr]
